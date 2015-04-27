@@ -14,7 +14,7 @@ public class MainActivity extends Activity implements SignUpHandler, LoadFilesSc
 {
 
 	// TODO (kshridha): add progress bar while logging in/signup
-
+	// TODO (kshridha): clear user creds on Login fragment after logout
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{

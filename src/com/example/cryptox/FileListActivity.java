@@ -209,8 +209,10 @@ public class FileListActivity extends Activity
 		}
 		else if (id == R.id.logout)
 		{
-			if (ParseUser.getCurrentUser() != null)
+			if (ParseUser.getCurrentUser() != null) {
 				ParseUser.logOut();
+				finish();
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}

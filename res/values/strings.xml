@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CryptoX</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_add">Add</string>
+    <string name="title_activity_sign_up">SignUp</string>
+    <string name="title_activity_to_do">ToDoActivity</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="signup">Sign Up</string>
+    <string name="cancel">Cancel</string>
+    <string name="new_account">Create New Account</string>
+    <string name="action_settings"> Action Settings </string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="new_user">New User? Please Sign Up</string>
+    <string name="title_activity_file_details">File Details</string>
+    <string name="sort_name_dsc">Sort by Name (Descending)</string>
+    <string name="sort_name_asc">Sort by Name (Ascending)</string>
+    <string name="sort_size_dsc">Sort by Size (Descending)</string>
+    <string name="sort_size_asc">Sort by Size (Ascending)</string>
+    <string name="sort_date_dsc">Sort by Date (Descending)</string>
+    <string name="sort_date_asc">Sort by Date (Ascending)</string>
+    <string name="logout">Logout</string>
+    <string name="original">Original List</string>
+    
+</resources>

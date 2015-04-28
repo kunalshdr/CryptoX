@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:tag="Favorite"
-    tools:context="com.example.cryptox.FileDetailsFragment" >
+    tools:context="com.example.cryptox.fragments.FileDetailsFragment" >
 
     <LinearLayout
         android:layout_width="match_parent"

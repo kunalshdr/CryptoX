@@ -1,9 +1,14 @@
-package com.example.cryptox;
+package com.example.cryptox.fragments;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.example.cryptox.FileListActivity;
+import com.example.cryptox.R;
+import com.example.cryptox.R.drawable;
+import com.example.cryptox.R.id;
+import com.example.cryptox.R.layout;
 import com.example.cryptox.asynctasks.DownloadFileAsyncTask;
 import com.example.cryptox.models.CryptoXFile;
 import com.example.cryptox.models.User;
@@ -32,9 +37,6 @@ import android.widget.Toast;
 public class FileDetailsFragment extends Fragment
 {
 
-	// TODO (kshridha): Add a title File Details and the user info message to
-	// top of fragment and keep the fragment always visible
-
 	ArrayList<User> userList;
 	ArrayList<String> userNameList;
 	ImageView favImageView;
@@ -53,8 +55,8 @@ public class FileDetailsFragment extends Fragment
 
 	public void displayCryptoXFileDetail(final CryptoXFile cryptoXFile)
 	{
-		View v = getActivity().findViewById(R.id.fragment1);
-
+		// View v = getActivity().findViewById(R.id.fragment1);
+		View v = null;
 		TextView fileTitleTextView = (TextView) v.findViewById(R.id.textViewFileTitle);
 		fileTitleTextView.setText(cryptoXFile.getName());
 
@@ -76,8 +78,6 @@ public class FileDetailsFragment extends Fragment
 					favImageView.setTag("NotFavorite");
 					favImageView.setImageResource(R.drawable.ic_action_not_important);
 
-					// TODO (kshridha): make parse favorite column for the file
-					// false
 					Toast.makeText(getActivity(), "Removed from favorites", Toast.LENGTH_SHORT).show();
 				}
 				else
@@ -85,8 +85,6 @@ public class FileDetailsFragment extends Fragment
 					favImageView.setTag("Favorite");
 					favImageView.setImageResource(R.drawable.ic_action_important);
 
-					// TODO (kshridha): make parse favorite column for the file
-					// true
 					Toast.makeText(getActivity(), "Added to favorites", Toast.LENGTH_SHORT).show();
 
 				}
@@ -137,8 +135,7 @@ public class FileDetailsFragment extends Fragment
 									String[] userNameSplit = userNameList.get(which).trim().split(" ");
 									String fName = userNameSplit[0];
 									String lName = userNameSplit[1];
-									// TODO (kshridha): Add code to share with
-									// other users
+
 								}
 							});
 							userListAlert.create().show();

@@ -167,12 +167,12 @@ containing a value of this type.
         public static final int value=0x7f010005;
     }
     public static final class bool {
-        public static final int use_activity=0x7f070000;
-        public static final int use_provider=0x7f070001;
+        public static final int use_activity=0x7f090000;
+        public static final int use_provider=0x7f090001;
     }
     public static final class color {
-        public static final int green=0x7f060000;
-        public static final int thumbColor=0x7f060001;
+        public static final int green=0x7f080000;
+        public static final int thumbColor=0x7f080001;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -182,10 +182,10 @@ containing a value of this type.
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
     
          */
-        public static final int activity_horizontal_margin=0x7f080002;
-        public static final int activity_vertical_margin=0x7f080003;
-        public static final int list_item_padding=0x7f080001;
-        public static final int list_padding=0x7f080000;
+        public static final int activity_horizontal_margin=0x7f0a0002;
+        public static final int activity_vertical_margin=0x7f0a0003;
+        public static final int list_item_padding=0x7f0a0001;
+        public static final int list_padding=0x7f0a0000;
     }
     public static final class drawable {
         public static final int background_button=0x7f020000;
@@ -223,59 +223,58 @@ containing a value of this type.
         public static final int sprite_check=0x7f020020;
     }
     public static final class id {
-        public static final int RelativeLayout1=0x7f0c0015;
-        public static final int blue=0x7f0c0009;
-        public static final int buttonCreateNewAccount=0x7f0c001e;
-        public static final int buttonLogin=0x7f0c001f;
-        public static final int buttonSignup=0x7f0c0026;
+        public static final int RelativeLayout1=0x7f0c0014;
+        public static final int blue=0x7f0c0008;
+        public static final int buttonCreateNewAccount=0x7f0c001d;
+        public static final int buttonLogin=0x7f0c001e;
+        public static final int buttonSignup=0x7f0c0025;
         public static final int buttonUploadFiles=0x7f0c0001;
-        public static final int button_accept=0x7f0c0010;
-        public static final int button_cancel=0x7f0c000f;
-        public static final int buttonflat=0x7f0c002a;
-        public static final int container=0x7f0c0003;
-        public static final int contentDialog=0x7f0c000b;
-        public static final int contentSelector=0x7f0c0005;
-        public static final int dialog_rootView=0x7f0c000a;
-        public static final int editTextEmail=0x7f0c0021;
-        public static final int editTextPassword=0x7f0c0020;
-        public static final int editTextPasswordConfirm=0x7f0c0025;
-        public static final int editTextUserName=0x7f0c0024;
-        public static final int fragment1=0x7f0c0002;
-        public static final int green=0x7f0c0008;
-        public static final int imageViewCryptoX=0x7f0c0022;
-        public static final int imageViewDownload=0x7f0c001b;
-        public static final int imageViewFavorite=0x7f0c0019;
-        public static final int imageViewFile=0x7f0c0011;
-        public static final int imageViewShared=0x7f0c001a;
-        public static final int linearLayoutButtons=0x7f0c0018;
+        public static final int button_accept=0x7f0c000f;
+        public static final int button_cancel=0x7f0c000e;
+        public static final int buttonflat=0x7f0c0029;
+        public static final int container=0x7f0c0002;
+        public static final int contentDialog=0x7f0c000a;
+        public static final int contentSelector=0x7f0c0004;
+        public static final int dialog_rootView=0x7f0c0009;
+        public static final int editTextEmail=0x7f0c0020;
+        public static final int editTextPassword=0x7f0c001f;
+        public static final int editTextPasswordConfirm=0x7f0c0024;
+        public static final int editTextUserName=0x7f0c0023;
+        public static final int green=0x7f0c0007;
+        public static final int imageViewCryptoX=0x7f0c0021;
+        public static final int imageViewDownload=0x7f0c001a;
+        public static final int imageViewFavorite=0x7f0c0018;
+        public static final int imageViewFile=0x7f0c0010;
+        public static final int imageViewShared=0x7f0c0019;
+        public static final int linearLayoutButtons=0x7f0c0017;
         public static final int listViewFiles=0x7f0c0000;
-        public static final int logInFragment=0x7f0c001d;
-        public static final int logout=0x7f0c0034;
-        public static final int message=0x7f0c000e;
-        public static final int message_scrollView=0x7f0c000d;
-        public static final int number_indicator_spinner_content=0x7f0c0027;
-        public static final int original_lst=0x7f0c002d;
-        public static final int progressBarCircularIndetermininate=0x7f0c0028;
-        public static final int red=0x7f0c0007;
-        public static final int rootSelector=0x7f0c0004;
-        public static final int shape_bacground=0x7f0c002c;
-        public static final int signUpFragment=0x7f0c0023;
-        public static final int snackbar=0x7f0c0029;
-        public static final int sortByDateModifiedAscending=0x7f0c0032;
-        public static final int sortByDateModifiedDescending=0x7f0c0033;
-        public static final int sortByNameAscending=0x7f0c002e;
-        public static final int sortByNameDescending=0x7f0c002f;
-        public static final int sortBySizeAscending=0x7f0c0030;
-        public static final int sortBySizeDescending=0x7f0c0031;
-        public static final int text=0x7f0c002b;
-        public static final int textViewFileName=0x7f0c0012;
-        public static final int textViewFileSize=0x7f0c0013;
-        public static final int textViewFileTitle=0x7f0c0016;
-        public static final int textViewFileType=0x7f0c0017;
-        public static final int textViewUserInfo=0x7f0c001c;
-        public static final int textViewlastModified=0x7f0c0014;
-        public static final int title=0x7f0c000c;
-        public static final int viewColor=0x7f0c0006;
+        public static final int logInFragment=0x7f0c001c;
+        public static final int logout=0x7f0c0033;
+        public static final int message=0x7f0c000d;
+        public static final int message_scrollView=0x7f0c000c;
+        public static final int number_indicator_spinner_content=0x7f0c0026;
+        public static final int original_lst=0x7f0c002c;
+        public static final int progressBarCircularIndetermininate=0x7f0c0027;
+        public static final int red=0x7f0c0006;
+        public static final int rootSelector=0x7f0c0003;
+        public static final int shape_bacground=0x7f0c002b;
+        public static final int signUpFragment=0x7f0c0022;
+        public static final int snackbar=0x7f0c0028;
+        public static final int sortByDateModifiedAscending=0x7f0c0031;
+        public static final int sortByDateModifiedDescending=0x7f0c0032;
+        public static final int sortByNameAscending=0x7f0c002d;
+        public static final int sortByNameDescending=0x7f0c002e;
+        public static final int sortBySizeAscending=0x7f0c002f;
+        public static final int sortBySizeDescending=0x7f0c0030;
+        public static final int text=0x7f0c002a;
+        public static final int textViewFileName=0x7f0c0011;
+        public static final int textViewFileSize=0x7f0c0012;
+        public static final int textViewFileTitle=0x7f0c0015;
+        public static final int textViewFileType=0x7f0c0016;
+        public static final int textViewUserInfo=0x7f0c001b;
+        public static final int textViewlastModified=0x7f0c0013;
+        public static final int title=0x7f0c000b;
+        public static final int viewColor=0x7f0c0005;
     }
     public static final class layout {
         public static final int activity_files=0x7f030000;
@@ -295,38 +294,38 @@ containing a value of this type.
         public static final int file_details=0x7f0b0000;
     }
     public static final class string {
-        public static final int action_add=0x7f090008;
-        public static final int action_logout=0x7f090007;
-        public static final int action_settings=0x7f090013;
-        public static final int app_name=0x7f090005;
-        public static final int cancel=0x7f090011;
-        public static final int choose_file=0x7f090002;
-        public static final int confirm_password=0x7f09000e;
-        public static final int email=0x7f09000c;
-        public static final int empty_directory=0x7f090000;
-        public static final int error_selecting_file=0x7f090003;
-        public static final int hello_blank_fragment=0x7f090014;
-        public static final int hello_world=0x7f090006;
-        public static final int internal_storage=0x7f090004;
-        public static final int login=0x7f09000f;
-        public static final int logout=0x7f09001d;
-        public static final int name=0x7f09000b;
-        public static final int new_account=0x7f090012;
-        public static final int new_user=0x7f090015;
-        public static final int original=0x7f09001e;
-        public static final int password=0x7f09000d;
-        public static final int signup=0x7f090010;
-        public static final int sort_date_asc=0x7f09001c;
-        public static final int sort_date_dsc=0x7f09001b;
-        public static final int sort_name_asc=0x7f090018;
-        public static final int sort_name_dsc=0x7f090017;
-        public static final int sort_size_asc=0x7f09001a;
-        public static final int sort_size_dsc=0x7f090019;
-        public static final int storage_removed=0x7f090001;
-        public static final int title_activity_file_details=0x7f090016;
-        public static final int title_activity_sign_up=0x7f090009;
-        public static final int title_activity_to_do=0x7f09000a;
-        public static final int user_info=0x7f09001f;
+        public static final int action_add=0x7f060008;
+        public static final int action_logout=0x7f060007;
+        public static final int action_settings=0x7f060013;
+        public static final int app_name=0x7f060000;
+        public static final int cancel=0x7f060011;
+        public static final int choose_file=0x7f060003;
+        public static final int confirm_password=0x7f06000e;
+        public static final int email=0x7f06000c;
+        public static final int empty_directory=0x7f060001;
+        public static final int error_selecting_file=0x7f060004;
+        public static final int hello_blank_fragment=0x7f060014;
+        public static final int hello_world=0x7f060006;
+        public static final int internal_storage=0x7f060005;
+        public static final int login=0x7f06000f;
+        public static final int logout=0x7f06001d;
+        public static final int name=0x7f06000b;
+        public static final int new_account=0x7f060012;
+        public static final int new_user=0x7f060015;
+        public static final int original=0x7f06001e;
+        public static final int password=0x7f06000d;
+        public static final int signup=0x7f060010;
+        public static final int sort_date_asc=0x7f06001c;
+        public static final int sort_date_dsc=0x7f06001b;
+        public static final int sort_name_asc=0x7f060018;
+        public static final int sort_name_dsc=0x7f060017;
+        public static final int sort_size_asc=0x7f06001a;
+        public static final int sort_size_dsc=0x7f060019;
+        public static final int storage_removed=0x7f060002;
+        public static final int title_activity_file_details=0x7f060016;
+        public static final int title_activity_sign_up=0x7f060009;
+        public static final int title_activity_to_do=0x7f06000a;
+        public static final int user_info=0x7f06001f;
     }
     public static final class style {
         /** 
@@ -349,13 +348,35 @@ containing a value of this type.
         res/values-v11/styles.xml on API 14+ devices.
     
  API 14 theme customizations can go here. 
+
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    
+
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        
+
+        Base application theme for API 11+. This theme completely replaces
+        AppBaseTheme from res/values/styles.xml on API 11+ devices.
+    
+ API 11 theme customizations can go here. 
+
+        Base application theme for API 14+. This theme completely replaces
+        AppBaseTheme from BOTH res/values/styles.xml and
+        res/values-v11/styles.xml on API 14+ devices.
+    
+ API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f0a0001;
+        public static final int AppBaseTheme=0x7f070000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
+ Application theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f0a0002;
-        public static final int fileChooserName=0x7f0a0000;
+        public static final int AppTheme=0x7f070001;
+        public static final int fileChooserName=0x7f070002;
     }
     public static final class xml {
         public static final int mimetypes=0x7f050000;

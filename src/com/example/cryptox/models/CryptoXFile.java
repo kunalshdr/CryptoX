@@ -63,11 +63,22 @@ public class CryptoXFile
 		this.sizeBytes = sizeBytes;
 	}
 
+	public boolean isFavorite()
+	{
+		return favorite;
+	}
+
+	public void setFavorite(boolean favorite)
+	{
+		this.favorite = favorite;
+	}
+
 	private String name;
 	private String dateModified;
 	private String size;
 	private String type;
 	private String path;
+	private boolean favorite;
 	private long sizeBytes;
 
 }

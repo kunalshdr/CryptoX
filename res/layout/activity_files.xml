@@ -5,33 +5,21 @@
     android:layout_height="match_parent"
     tools:context="${relativePackage}.${activityClass}" >
 
-    <ListView
+    <com.baoyz.swipemenulistview.SwipeMenuListView
         android:id="@+id/listViewFiles"
-        android:layout_width="wrap_content"
-        android:layout_height="340dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
-    </ListView>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <com.gc.materialdesign.views.ButtonFloat
         android:id="@+id/buttonUploadFiles"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="270dp"
         android:background="#1E88E5"
         materialdesign:animate="true"
         materialdesign:iconDrawable="@drawable/ic_action_new" />
-
-    <fragment
-        android:id="@+id/fragment1"
-        android:name="com.example.cryptox.FileDetailsFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="15dp"
-        android:layout_below="@+id/listViewFiles" />
 
 </RelativeLayout>

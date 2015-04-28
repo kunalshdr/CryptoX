@@ -5,7 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.baoyz.swipemenulistview.SwipeMenuListView.OnMenuItemClickListener;
+import com.baoyz.swipemenulistview.SwipeMenuListView.OnSwipeListener;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.DropboxFileInfo;
 import com.dropbox.client2.DropboxAPI.Entry;
@@ -17,6 +24,7 @@ import com.example.cryptox.asynctasks.GetFileListAsyncTask;
 import com.example.cryptox.asynctasks.UploadFileAsyncTask;
 import com.example.cryptox.fragments.LogInFragment;
 import com.example.cryptox.models.CryptoXFile;
+import com.example.cryptox.models.User;
 import com.example.cryptox.utils.DateComparatorAscUtil;
 import com.example.cryptox.utils.DateComparatorDescUtil;
 import com.example.cryptox.utils.NameComparatorAscUtil;
@@ -24,14 +32,23 @@ import com.example.cryptox.utils.NameComparatorDescUtil;
 import com.example.cryptox.utils.SizeComparatorAscUtil;
 import com.example.cryptox.utils.SizeComparatorDescUtil;
 import com.ipaulpro.afilechooser.utils.FileUtils;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -52,19 +69,23 @@ public class FileListActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_files);
 
-		filesListView = (ListView) findViewById(R.id.listViewFiles);
+		filesListView = (SwipeMenuListView) findViewById(R.id.listViewFiles);
 		filesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
-			
-				FileDetailsFragment fileDetailsFragment = (FileDetailsFragment) getFragmentManager().findFragmentById(R.id.fragment1);
-				fileDetailsFragment.displayCryptoXFileDetail(cryptoXFilesCopy.get(position));
+
+				// FileDetailsFragment fileDetailsFragment =
+				// (FileDetailsFragment)
+				// getFragmentManager().findFragmentById(R.id.fragment1);
+				// fileDetailsFragment.displayCryptoXFileDetail(cryptoXFilesCopy.get(position));
 			}
 
 		});
 
+		// using the MaterialDesign library for floating add button
+		// https://github.com/navasmdc/MaterialDesignLibrary
 		findViewById(R.id.buttonUploadFiles).setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -208,7 +229,8 @@ public class FileListActivity extends Activity
 		}
 		else if (id == R.id.logout)
 		{
-			if (ParseUser.getCurrentUser() != null) {
+			if (ParseUser.getCurrentUser() != null)
+			{
 				ParseUser.logOut();
 				finish();
 			}
@@ -226,7 +248,7 @@ public class FileListActivity extends Activity
 	{
 		cryptoXFiles = result;
 
-		// copy crytpoX in two places 
+		// copy crytpoX in two places
 		for (int i = 0; i < cryptoXFiles.size(); i++)
 		{
 			cachedFileList.add(cryptoXFiles.get(i));
@@ -236,19 +258,183 @@ public class FileListActivity extends Activity
 
 		adapter = new FileAdapter(this, R.layout.files_layout, result);
 		filesListView.setAdapter(adapter);
+		setupListViewSwipe();
+	}
+
+	// using the SwipeMenuListView library
+	// https://github.com/baoyongzhang/SwipeMenuListView
+	private void setupListViewSwipe()
+	{
+		SwipeMenuCreator creator = new SwipeMenuCreator() {
+
+			@Override
+			public void create(SwipeMenu menu)
+			{
+				// the favorite icon
+				favButton = new SwipeMenuItem(getApplicationContext());
+				favButton.setBackground(new ColorDrawable(Color.rgb(0x17, 0x88, 0xCE)));
+				favButton.setWidth(150);
+				favButton.setIcon(R.drawable.ic_action_not_important);
+				menu.addMenuItem(favButton);
+
+				// share button
+				SwipeMenuItem shareButton = new SwipeMenuItem(getApplicationContext());
+				shareButton.setBackground(new ColorDrawable(Color.rgb(0xD9, 0xA1, 0xCA)));
+				shareButton.setWidth(150);
+				shareButton.setIcon(R.drawable.ic_action_share);
+				menu.addMenuItem(shareButton);
+
+				// download button
+				SwipeMenuItem downloadButton = new SwipeMenuItem(getApplicationContext());
+				downloadButton.setBackground(new ColorDrawable(Color.rgb(0xAA, 0xBC, 0x1E)));
+				downloadButton.setWidth(150);
+				downloadButton.setIcon(R.drawable.ic_action_download);
+				menu.addMenuItem(downloadButton);
+			}
+		};
+		filesListView.setMenuCreator(creator);
+
+		filesListView.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(int position, SwipeMenu menu, int index)
+			{
+				CryptoXFile file = cryptoXFilesCopy.get(position);
+
+				switch (index)
+				{
+				case 0:
+					toggleFav(file);
+					break;
+				case 1:
+					shareFile(file);
+					break;
+				case 2:
+					downloadFile(file);
+					break;
+				}
+				return false;
+			}
+
+		});
+
+		filesListView.setOnSwipeListener(new OnSwipeListener() {
+
+			@Override
+			public void onSwipeStart(int position)
+			{
+				Log.d("SwipeTest::", "Swipe Open working");
+				CryptoXFile file = cryptoXFilesCopy.get(position);
+				if (file.isFavorite())
+				{
+					favButton.setIcon(R.drawable.ic_action_important);
+				}
+			}
+
+			@Override
+			public void onSwipeEnd(int position)
+			{
+				Log.d("SwipeTest::", "Swipe Close working");
+			}
+		});
+	}
+
+	protected void toggleFav(CryptoXFile file)
+	{
+		if (file.isFavorite())
+		{
+			file.setFavorite(false);
+			Toast.makeText(getApplicationContext(), "File removed from favorites", Toast.LENGTH_SHORT).show();
+			// TODO (kshridha): Add favorites columns in parse, then implement
+			// fav functionality
+		}
+		else
+		{
+			file.setFavorite(true);
+			Toast.makeText(getApplicationContext(), "File added to favorites", Toast.LENGTH_SHORT).show();
+			// TODO (kshridha): Add favorites columns in parse, then implement
+			// fav functionality
+		}
+	}
+
+	protected void shareFile(CryptoXFile file)
+	{
+		userList = new ArrayList<User>();
+		userNameList = new ArrayList<String>();
+
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("_User");
+		query.findInBackground(new FindCallback<ParseObject>() {
+
+			@Override
+			public void done(List<ParseObject> users, ParseException e)
+			{
+				if (e == null)
+				{
+					for (int i = 0; i < users.size(); i++)
+					{
+						User user = new User();
+						user.setName(users.get(i).getString("name"));
+						userList.add(user);
+					}
+					Collections.sort(userList);
+
+					for (int i = 0; i < userList.size(); i++)
+					{
+						userNameList.add(userList.get(i).getName());
+					}
+					CharSequence[] userNames = new CharSequence[userNameList.size()];
+					for (int i = 0; i < userNameList.size(); i++)
+					{
+						userNames[i] = userNameList.get(i);
+					}
+					AlertDialog.Builder userListAlert = new AlertDialog.Builder(FileListActivity.this);
+					userListAlert.setTitle("Share with").setIcon(R.drawable.ic_action_share);
+					userListAlert.setItems(userNames, new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							String[] userNameSplit = userNameList.get(which).trim().split(" ");
+							String fName = userNameSplit[0];
+							String lName = userNameSplit[1];
+							// TODO (kshridha): Add code to share with
+							// other users
+
+							// TODO (kshridha): Clear dialog before loading..
+							// entried appending each time dialog is opnend
+						}
+					});
+					userListAlert.create().show();
+				}
+				else
+				{
+					Log.d("UsersListLoad:::", e.getMessage());
+				}
+			}
+		});
+
+	}
+
+	protected void downloadFile(CryptoXFile cryptoXFile)
+	{
+		String path = cryptoXFile.getPath() + cryptoXFile.getName();
+		new DownloadFileAsyncTask(FileListActivity.this).execute(path);
+
 	}
 
 	ArrayList<CryptoXFile> cryptoXFiles;
-	
+
 	// copy of cryptoXFiles for sorting functions
 	ArrayList<CryptoXFile> cachedFileList = new ArrayList<CryptoXFile>();
-	
+
 	// copy of cryptoXFiles in case original list is cleared
 	ArrayList<CryptoXFile> cryptoXFilesCopy = new ArrayList<CryptoXFile>();
 
-	ListView filesListView;
+	SwipeMenuListView filesListView;
 	String filePath;
 	FileAdapter adapter;
+	ArrayList<User> userList;
+	ArrayList<String> userNameList;
+	SwipeMenuItem favButton;
 
 	// request codes for startActivityForResult
 	protected static final int REQ_CODE_GET_FILE = 1002;

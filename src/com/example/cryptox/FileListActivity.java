@@ -27,6 +27,7 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
 import com.parse.ParseUser;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -57,11 +58,9 @@ public class FileListActivity extends Activity
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
-				// String path = cryptoXFiles.get(position).getPath() +
-				// cryptoXFiles.get(position).getName();
-				// new
-				// DownloadFileAsyncTask(FileListActivity.this).execute(path);
-
+			
+				FileDetailsFragment fileDetailsFragment = (FileDetailsFragment) getFragmentManager().findFragmentById(R.id.fragment1);
+				fileDetailsFragment.displayCryptoXFileDetail(cryptoXFilesCopy.get(position));
 			}
 
 		});

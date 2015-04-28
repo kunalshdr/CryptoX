@@ -49,7 +49,7 @@ public class FileAdapter extends ArrayAdapter<CryptoXFile>
 		// remove the +0000 part from date 
 		String date = object.get(position).getDateModified();
 		date = date.substring(0, date.indexOf('+')).trim();
-		fileModifiedDateTextView.setText(object.get(position).getType());
+		fileModifiedDateTextView.setText(date);
 
 		// set the image icon based on the file type
 		ImageView thumbnailImageView = (ImageView) v.findViewById(R.id.imageViewFile);

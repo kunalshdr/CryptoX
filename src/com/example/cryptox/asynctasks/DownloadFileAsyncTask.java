@@ -47,6 +47,8 @@ public class DownloadFileAsyncTask extends AsyncTask<String, Void, Void>
 		try
 		{
 			outputStream = new FileOutputStream(file);
+			// TODO (kshridha): remove the hardcoded Sachin.png with the proper
+			// file path
 			info = FileListActivity.mDBApi.getFile("/CryptoX/Sachin.jpg", null, outputStream, null);
 			Log.i("DownloadFileAsyncTask::", info.getFileSize() + "");
 		}
@@ -56,7 +58,7 @@ public class DownloadFileAsyncTask extends AsyncTask<String, Void, Void>
 		}
 		catch (DropboxException e)
 		{
-			Log.d("DownloadFileAsyncTask::", e.getMessage());
+			Log.d("DownloadFileAsyncTask::", "Download Download Error");
 		}
 		return null;
 	}

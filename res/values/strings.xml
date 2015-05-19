@@ -26,7 +26,9 @@
     <string name="sort_date_dsc">Sort by Date (Descending)</string>
     <string name="sort_date_asc">Sort by Date (Ascending)</string>
     <string name="logout">Logout</string>
-    <string name="original">Original List</string>
+    <string name="original">View Original List</string>
+    <string name="favorite">View Favorite List</string>
+    <string name="shared">View Shared List</string>
     <string name="user_info">(Click a file to get details)</string>
-    
+
 </resources>

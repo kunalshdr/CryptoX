@@ -1,11 +1,42 @@
 package com.example.cryptox;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore.Files;
+import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
@@ -14,19 +45,17 @@ import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.baoyz.swipemenulistview.SwipeMenuListView.OnMenuItemClickListener;
 import com.baoyz.swipemenulistview.SwipeMenuListView.OnSwipeListener;
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.DropboxAPI.DropboxFileInfo;
-import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.cryptox.asynctasks.DownloadFileAsyncTask;
 import com.example.cryptox.asynctasks.GetFileListAsyncTask;
 import com.example.cryptox.asynctasks.UploadFileAsyncTask;
-import com.example.cryptox.fragments.LogInFragment;
 import com.example.cryptox.models.CryptoXFile;
 import com.example.cryptox.models.User;
 import com.example.cryptox.utils.DateComparatorAscUtil;
 import com.example.cryptox.utils.DateComparatorDescUtil;
+import com.example.cryptox.utils.FileSizeUtil;
 import com.example.cryptox.utils.NameComparatorAscUtil;
 import com.example.cryptox.utils.NameComparatorDescUtil;
 import com.example.cryptox.utils.SizeComparatorAscUtil;
@@ -37,29 +66,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Fragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.ApplicationInfo;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterViewFlipper;
-import android.widget.ListView;
-import android.widget.Toast;
+import com.parse.SaveCallback;
 
 public class FileListActivity extends Activity
 {
@@ -69,20 +76,22 @@ public class FileListActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_files);
 
+		// authenticate dropbox at the beginning
+		// no need to do that for every operation
+		authenticateDropbox();
+
+		// mDBApi.getSession().finishAuthentication();
+		// hard-coding token_key and token_secret to avoid
+		// authentication
+		token_key = "w4meo7pm98ii6gp9";
+		token_secret = "73tm5yhw8wa01af";
+		AccessTokenPair tokens = new AccessTokenPair(token_key, token_secret);
+		mDBApi.getSession().setAccessTokenPair(tokens);
+
 		filesListView = (SwipeMenuListView) findViewById(R.id.listViewFiles);
-		filesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-			{
-
-				// FileDetailsFragment fileDetailsFragment =
-				// (FileDetailsFragment)
-				// getFragmentManager().findFragmentById(R.id.fragment1);
-				// fileDetailsFragment.displayCryptoXFileDetail(cryptoXFilesCopy.get(position));
-			}
-
-		});
+		// get the file list from parse and set adapter
+		setListViewAdapter();
 
 		// using the MaterialDesign library for floating add button
 		// https://github.com/navasmdc/MaterialDesignLibrary
@@ -99,26 +108,6 @@ public class FileListActivity extends Activity
 			}
 		});
 
-	}
-
-	@Override
-	protected void onResume()
-	{
-		super.onResume();
-
-		if (mDBApi != null && mDBApi.getSession().authenticationSuccessful())
-		{
-			try
-			{
-				mDBApi.getSession().finishAuthentication();
-				accessToken = mDBApi.getSession().getOAuth2AccessToken();
-				uploadFile();
-			}
-			catch (IllegalStateException e)
-			{
-				Log.i("DbAuthLog", "Error authenticating", e);
-			}
-		}
 	}
 
 	@Override
@@ -140,7 +129,15 @@ public class FileListActivity extends Activity
 						Toast.makeText(FileListActivity.this, "Please select a file", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					authenticateDropbox();
+					// authenticateDropbox();
+					try
+					{
+						uploadFile();
+					}
+					catch (java.text.ParseException e)
+					{
+						Log.d("DateParseException", e.getMessage());
+					}
 				}
 			}
 			else
@@ -155,11 +152,7 @@ public class FileListActivity extends Activity
 		AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
 		AndroidAuthSession session = new AndroidAuthSession(appKeys);
 		mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-		// TODO (kshridha): Only one authentication per session
-		if (!mDBApi.getSession().isLinked())
-			mDBApi.getSession().startOAuth2Authentication(FileListActivity.this);
-		else
-			uploadFile();
+		// mDBApi.getSession().startAuthentication(FileListActivity.this);
 
 	}
 
@@ -223,42 +216,356 @@ public class FileListActivity extends Activity
 		}
 		else if (id == R.id.original_lst)
 		{
+			cachedFileList = cryptoXFilesCopy;
 			adapter.clear();
 			adapter.addAll(cryptoXFilesCopy);
 			adapter.notifyDataSetChanged();
+		}
+		else if (id == R.id.favorite_list)
+		{
+			
+			favList = new ArrayList<CryptoXFile>();
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Favorites");
+			query.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
+			query.findInBackground(new FindCallback<ParseObject>() {
+
+				@Override
+				public void done(List<ParseObject> objects, ParseException e)
+				{
+					if (e == null)
+					{
+						for (int i = 0; i < objects.size(); i++)
+						{
+							CryptoXFile cryptoFile = new CryptoXFile();
+							cryptoFile.setDateModified(objects.get(i).getString("lastModified"));
+							cryptoFile.setFavorite(objects.get(i).getBoolean("favorite"));
+							cryptoFile.setName(objects.get(i).getString("filename"));
+							cryptoFile.setSize(objects.get(i).getString("fileSize"));
+							cryptoFile.setType(objects.get(i).getString("fileType"));
+							cryptoFile.setSizeBytes(objects.get(i).getLong("fileSizeBytes"));
+							cryptoFile.setPath(objects.get(i).getString("originalPath"));
+							cryptoFile.setHashValue(objects.get(i).getString("encFileName"));
+							favList.add(cryptoFile);
+						}
+						cachedFileList = favList;
+						adapter.clear();
+						adapter.addAll(new ArrayList<CryptoXFile>(favList));
+						adapter.notifyDataSetChanged();
+					}
+					else
+					{
+						Log.d("Favorites::", e.getMessage());
+					}
+
+				}
+
+			});
+		}
+		else if (id == R.id.shared_lst)
+		{
+			sharedList = new ArrayList<CryptoXFile>();
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Shared");
+			query.whereEqualTo("sharedWith", ParseUser.getCurrentUser().getUsername());
+			query.findInBackground(new FindCallback<ParseObject>() {
+
+				@Override
+				public void done(List<ParseObject> objects, ParseException e)
+				{
+					if (e == null)
+					{
+						for (int i = 0; i < objects.size(); i++)
+						{
+							CryptoXFile cryptoFile = new CryptoXFile();
+							cryptoFile.setDateModified(objects.get(i).getString("lastModified"));
+							cryptoFile.setFavorite(objects.get(i).getBoolean("favorite"));
+							cryptoFile.setName(objects.get(i).getString("filename"));
+							cryptoFile.setSize(objects.get(i).getString("fileSize"));
+							cryptoFile.setType(objects.get(i).getString("fileType"));
+							cryptoFile.setSizeBytes(objects.get(i).getLong("fileSizeBytes"));
+							cryptoFile.setPath(objects.get(i).getString("originalPath"));
+							cryptoFile.setHashValue(objects.get(i).getString("encFileName"));
+							sharedList.add(cryptoFile);
+						}
+						cachedFileList = sharedList;
+						adapter.clear();
+						adapter.addAll(new ArrayList<CryptoXFile>(sharedList));
+						adapter.notifyDataSetChanged();
+					}
+					else
+					{
+						Log.d("Shared::", e.getMessage());
+					}
+
+				}
+
+			});
 		}
 		else if (id == R.id.logout)
 		{
 			if (ParseUser.getCurrentUser() != null)
 			{
 				ParseUser.logOut();
-				finish();
+				Intent i = new Intent(getBaseContext(), MainActivity.class);
+				startActivity(i);
 			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void uploadFile()
+	private void uploadFile() throws java.text.ParseException
 	{
-		new UploadFileAsyncTask(FileListActivity.this).execute(filePath);
-		new GetFileListAsyncTask(this).execute();
-	}
+		String newstr = null;
+		String hashedVal = null;
 
-	public void setListViewAdapter(ArrayList<CryptoXFile> result)
-	{
-		cryptoXFiles = result;
+		// create a file from file path
+		File file = new File(filePath);
 
-		// copy crytpoX in two places
-		for (int i = 0; i < cryptoXFiles.size(); i++)
+		// get the last modified date
+		SimpleDateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+		String lastModified = df.format(new Date(file.lastModified()));
+
+		// get the file size
+		long fileSizeBytes = file.length();
+		String fileSize = FileSizeUtil.getfileSize(fileSizeBytes);
+
+		// get the file type
+		String fileType = FileUtils.getMimeType(file);
+
+		// SHA256
+		try
 		{
-			cachedFileList.add(cryptoXFiles.get(i));
-			cryptoXFilesCopy.add(cryptoXFiles.get(i));
-
+			hashedVal = SHA256(filePath);
+		}
+		catch (Exception e)
+		{
+			Log.d("EncrptyFile::", e.getMessage());
 		}
 
-		adapter = new FileAdapter(this, R.layout.files_layout, result);
-		filesListView.setAdapter(adapter);
-		setupListViewSwipe();
+		// AES Encryption
+		try
+		{
+			encrypt(filePath, hashedVal);
+		}
+		catch (InvalidKeyException e)
+		{
+			Log.d("EncrptyFile::", e.getMessage());
+
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			Log.d("EncrptyFile::", e.getMessage());
+
+		}
+		catch (NoSuchPaddingException e)
+		{
+			Log.d("EncrptyFile::", e.getMessage());
+
+		}
+		catch (IOException e)
+		{
+			Log.d("EncrptyFile::", e.getMessage());
+
+		}
+		if (null != filePath && filePath.length() > 0)
+		{
+			int endIndex = filePath.lastIndexOf("/");
+			if (endIndex != -1)
+			{
+				newstr = filePath.substring(0, endIndex);
+			}
+		}
+
+		String[] bits = filePath.split("/");
+		String lastOne = bits[bits.length - 1];
+
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("userFiles");
+		query.whereEqualTo("fileName", file.getName());
+		query.whereEqualTo("encFileName", hashedVal);
+		try
+		{
+			// if same for file for same user already exists, don't add in parse and dropbox  
+			if (query.find().size() > 0 && query.find().get(0).getString("username").equalsIgnoreCase(ParseUser.getCurrentUser().getUsername()))
+			{
+				Toast.makeText(getApplicationContext(), "File Already Exists in your account", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			// if same file having other user exists; only add in parse and not in dropbox  
+			else if (query.find().size() > 0 && !query.find().get(0).getString("username").equalsIgnoreCase(ParseUser.getCurrentUser().getUsername()))
+			{
+				// only add parse entry.. no upload to file
+				ParseObject userFile = new ParseObject("userFiles");
+				userFile.put("username", ParseUser.getCurrentUser().getUsername());
+				userFile.put("encFileName", hashedVal);
+				userFile.put("fileName", lastOne);
+				userFile.put("favorite", false);
+				userFile.put("lastModified", lastModified);
+				userFile.put("fileSize", fileSize);
+				userFile.put("fileType", fileType);
+				userFile.put("fileSizeBytes", fileSizeBytes);
+				userFile.put("originalPath", filePath);
+				userFile.saveInBackground();
+				
+				refreshListView();
+			}
+			// if the file is not already uploaded, then add to parse as well as dropbox 
+			else
+			{
+				ParseObject userFile = new ParseObject("userFiles");
+				userFile.put("username", ParseUser.getCurrentUser().getUsername());
+				userFile.put("encFileName", hashedVal);
+				userFile.put("fileName", lastOne);
+				userFile.put("favorite", false);
+				userFile.put("lastModified", lastModified);
+				userFile.put("fileSize", fileSize);
+				userFile.put("fileType", fileType);
+				userFile.put("fileSizeBytes", fileSizeBytes);
+				userFile.put("originalPath", filePath);
+				userFile.saveInBackground();
+				
+				new UploadFileAsyncTask(FileListActivity.this).execute(newstr + "/" + hashedVal);
+
+			}
+		}
+		catch (ParseException e1)
+		{
+			Log.d("FileListActiviy", e1.getMessage());
+		}
+
+		// new GetFileListAsyncTask(this).execute();
+	}
+
+	public static String SHA256(String file) throws Exception
+	{
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		FileInputStream fis = new FileInputStream(file);
+
+		byte[] dataBytes = new byte[1024];
+
+		int nread = 0;
+		while ((nread = fis.read(dataBytes)) != -1)
+		{
+			md.update(dataBytes, 0, nread);
+		}
+
+		byte[] mdbytes = md.digest();
+
+		// convert the byte to hex format method 1
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < mdbytes.length; i++)
+		{
+			sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+
+		System.out.println("Hex format : " + sb.toString());
+
+		// convert the byte to hex format method 2
+		StringBuffer hexString = new StringBuffer();
+		for (int i = 0; i < mdbytes.length; i++)
+		{
+			hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
+		}
+
+		return hexString.toString();
+	}
+
+	public static void encrypt(String fileName, String hashedVal) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeyException
+	{
+		String newstr = null;
+		FileInputStream fis = new FileInputStream(fileName);
+		if (null != fileName && fileName.length() > 0)
+		{
+			int endIndex = fileName.lastIndexOf("/");
+			if (endIndex != -1)
+			{
+				newstr = fileName.substring(0, endIndex);
+			}
+		}
+		FileOutputStream fos = new FileOutputStream(newstr + "/" + hashedVal);
+		SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.ENCRYPT_MODE, sks);
+		CipherOutputStream cos = new CipherOutputStream(fos, cipher);
+		int b;
+		byte[] d = new byte[8];
+		while ((b = fis.read(d)) != -1)
+		{
+			cos.write(d, 0, b);
+		}
+		cos.flush();
+		cos.close();
+		fis.close();
+	}
+
+	public static void decrypt(String fileName, String hashedVal) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeyException
+	{
+		FileInputStream fis = new FileInputStream(fileName);
+		FileOutputStream fos = new FileOutputStream(hashedVal);
+		SecretKeySpec sks = new SecretKeySpec("MyDifficultPassw".getBytes(), "AES");
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.DECRYPT_MODE, sks);
+		CipherInputStream cis = new CipherInputStream(fis, cipher);
+		int b;
+		byte[] d = new byte[8];
+		while ((b = cis.read(d)) != -1)
+		{
+			fos.write(d, 0, b);
+		}
+		fos.flush();
+		fos.close();
+		cis.close();
+
+		// delete the encrpted file after decryption
+		File file = new File(fileName);
+		file.delete();
+	}
+
+	private void setListViewAdapter()
+	{
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("userFiles");
+		query.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
+		query.findInBackground(new FindCallback<ParseObject>() {
+			public void done(List<ParseObject> objects, ParseException e)
+			{
+				if (e == null)
+				{
+					for (int i = 0; i < objects.size(); i++)
+					{
+						// create custom crptoX files
+						CryptoXFile cryptoFile = new CryptoXFile();
+						cryptoFile.setDateModified(objects.get(i).getString("lastModified"));
+						cryptoFile.setFavorite(objects.get(i).getBoolean("favorite"));
+						cryptoFile.setName(objects.get(i).getString("fileName"));
+						cryptoFile.setSize(objects.get(i).getString("fileSize"));
+						cryptoFile.setType(objects.get(i).getString("fileType"));
+						cryptoFile.setSizeBytes(objects.get(i).getLong("fileSizeBytes"));
+						cryptoFile.setPath(objects.get(i).getString("originalPath"));
+						cryptoFile.setHashValue(objects.get(i).getString("encFileName"));
+
+						// add to main list
+						cryptoXFiles.add(cryptoFile);
+
+						// maintain copies of file list
+						// to be used for custom sorting purposes
+						cryptoXFilesCopy.add(cryptoFile);
+						cachedFileList.add(cryptoFile);
+					}
+					if (cryptoXFiles.size() == 0)
+					{
+						Toast.makeText(FileListActivity.this, "No files in your account", Toast.LENGTH_LONG).show();
+					}
+					// create and set adapter for file list
+					adapter = new FileAdapter(FileListActivity.this, R.layout.files_layout, cryptoXFiles);
+					filesListView.setAdapter(adapter);
+					setupListViewSwipe();
+				}
+				else
+				{
+					Log.d("GetParseFileList::", e.getMessage());
+				}
+			}
+		});
 	}
 
 	// using the SwipeMenuListView library
@@ -292,6 +599,27 @@ public class FileListActivity extends Activity
 				menu.addMenuItem(downloadButton);
 			}
 		};
+
+		filesListView.setOnSwipeListener(new OnSwipeListener() {
+
+			@Override
+			public void onSwipeStart(int position)
+			{
+				Log.d("SwipeTest::", "Swipe Open working");
+				CryptoXFile file = cryptoXFilesCopy.get(position);
+				if (isFavorite(file))
+				{
+					favButton.setIcon(R.drawable.ic_action_important);
+				}
+			}
+
+			@Override
+			public void onSwipeEnd(int position)
+			{
+				Log.d("SwipeTest::", "Swipe Close working");
+			}
+		});
+
 		filesListView.setMenuCreator(creator);
 
 		filesListView.setOnMenuItemClickListener(new OnMenuItemClickListener() {
@@ -316,47 +644,69 @@ public class FileListActivity extends Activity
 			}
 
 		});
+	}
 
-		filesListView.setOnSwipeListener(new OnSwipeListener() {
+	protected void toggleFav(final CryptoXFile file)
+	{
+
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Favorites");
+		query.whereEqualTo("encFileName", file.getHashValue());
+		query.findInBackground(new FindCallback<ParseObject>() {
 
 			@Override
-			public void onSwipeStart(int position)
+			public void done(List<ParseObject> objects, ParseException e)
 			{
-				Log.d("SwipeTest::", "Swipe Open working");
-				CryptoXFile file = cryptoXFilesCopy.get(position);
-				if (file.isFavorite())
+				if (objects.size() > 0 && objects.get(0).getBoolean("favorite"))
+				{
+					objects.get(0).deleteInBackground();
+					Toast.makeText(getApplicationContext(), "File removed from favorites", Toast.LENGTH_SHORT).show();
+				}
+				else
 				{
 					favButton.setIcon(R.drawable.ic_action_important);
+					ParseObject fav = new ParseObject("Favorites");
+					fav.put("username", ParseUser.getCurrentUser().getUsername());
+					fav.put("favorite", true);
+					fav.put("filename", file.getName());
+					fav.put("encFileName", file.getHashValue());
+					fav.put("lastModified", file.getDateModified());
+					fav.put("fileSize", file.getSize());
+					fav.put("fileType", file.getType());
+					fav.put("fileSizeBytes", file.getSizeBytes());
+					fav.put("originalPath", file.getPath());
+					fav.saveInBackground(new SaveCallback() {
+						@Override
+						public void done(ParseException e)
+						{
+							Toast.makeText(getApplicationContext(), "File added to Favorites", Toast.LENGTH_SHORT).show();
+						}
+					});
 				}
-			}
 
-			@Override
-			public void onSwipeEnd(int position)
-			{
-				Log.d("SwipeTest::", "Swipe Close working");
 			}
 		});
 	}
 
-	protected void toggleFav(CryptoXFile file)
+	private boolean isFavorite(CryptoXFile file)
 	{
-		if (file.isFavorite())
+		flag = false;
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Favorites");
+		query.whereEqualTo("encFileName", file.getHashValue());
+
+		try
 		{
-			file.setFavorite(false);
-			Toast.makeText(getApplicationContext(), "File removed from favorites", Toast.LENGTH_SHORT).show();
-			// TODO (kshridha): Add favorites columns in parse, then implement
-			// fav functionality
+			if (query.find().size() > 0)
+				flag = true;
 		}
-		else
+		catch (ParseException e)
 		{
-			file.setFavorite(true);
-			Toast.makeText(getApplicationContext(), "File added to favorites", Toast.LENGTH_SHORT).show();
-			// TODO (kshridha): Add favorites columns in parse, then implement
-			// fav functionality
+			e.printStackTrace();
 		}
+
+		return flag;
 	}
 
-	protected void shareFile(CryptoXFile file)
+	protected void shareFile(final CryptoXFile file)
 	{
 		userList = new ArrayList<User>();
 		userNameList = new ArrayList<String>();
@@ -372,7 +722,7 @@ public class FileListActivity extends Activity
 					for (int i = 0; i < users.size(); i++)
 					{
 						User user = new User();
-						user.setName(users.get(i).getString("name"));
+						user.setName(users.get(i).getString("username"));
 						userList.add(user);
 					}
 					Collections.sort(userList);
@@ -393,14 +743,35 @@ public class FileListActivity extends Activity
 						@Override
 						public void onClick(DialogInterface dialog, int which)
 						{
-							String[] userNameSplit = userNameList.get(which).trim().split(" ");
-							String fName = userNameSplit[0];
-							String lName = userNameSplit[1];
-							// TODO (kshridha): Add code to share with
-							// other users
+							final String uname = userList.get(which).getName();
+							ParseObject sharedApp = new ParseObject("Shared");
+							sharedApp.put("sharedWith", uname);
+							sharedApp.put("sharedFrom", ParseUser.getCurrentUser().getUsername());
+							sharedApp.put("filename", file.getName());
+							sharedApp.put("encFileName", file.getHashValue());
+							sharedApp.put("lastModified", file.getDateModified());
+							sharedApp.put("fileSize", file.getSize());
+							sharedApp.put("fileType", file.getType());
+							sharedApp.put("fileSizeBytes", file.getSizeBytes());
+							sharedApp.put("originalPath", file.getPath());
 
-							// TODO (kshridha): Clear dialog before loading..
-							// entried appending each time dialog is opnend
+							sharedApp.saveInBackground(new SaveCallback() {
+
+								@Override
+								public void done(ParseException e)
+								{
+									if (e == null)
+									{
+										Toast.makeText(FileListActivity.this, "Shared with " + uname, Toast.LENGTH_SHORT).show();
+									}
+									else
+									{
+										Log.d("SharedFeature::", e.getMessage());
+									}
+
+								}
+							});
+
 						}
 					});
 					userListAlert.create().show();
@@ -414,14 +785,32 @@ public class FileListActivity extends Activity
 
 	}
 
+	public void refreshListView()
+	{
+		// clear all the lists as they will be repopulated in setListViewAdapter
+		cryptoXFiles.clear();
+		cryptoXFilesCopy.clear();
+		cachedFileList.clear();
+
+		// clear list view adapter
+		adapter.clear();
+
+		setListViewAdapter();
+	}
+
 	protected void downloadFile(CryptoXFile cryptoXFile)
 	{
-		String path = cryptoXFile.getPath() + cryptoXFile.getName();
-		new DownloadFileAsyncTask(FileListActivity.this).execute(path);
+		new DownloadFileAsyncTask(FileListActivity.this).execute(cryptoXFile);
 
 	}
 
-	ArrayList<CryptoXFile> cryptoXFiles;
+	protected void onDestroy()
+	{
+		finish();
+		System.exit(0);
+	}
+
+	ArrayList<CryptoXFile> cryptoXFiles = new ArrayList<CryptoXFile>();;
 
 	// copy of cryptoXFiles for sorting functions
 	ArrayList<CryptoXFile> cachedFileList = new ArrayList<CryptoXFile>();
@@ -429,12 +818,21 @@ public class FileListActivity extends Activity
 	// copy of cryptoXFiles in case original list is cleared
 	ArrayList<CryptoXFile> cryptoXFilesCopy = new ArrayList<CryptoXFile>();
 
+	// fav list
+	ArrayList<CryptoXFile> favList;
+
+	// shared list
+	ArrayList<CryptoXFile> sharedList;
+
 	SwipeMenuListView filesListView;
 	String filePath;
 	FileAdapter adapter;
 	ArrayList<User> userList;
 	ArrayList<String> userNameList;
 	SwipeMenuItem favButton;
+	String token_key;
+	String token_secret;
+	boolean flag;
 
 	// request codes for startActivityForResult
 	protected static final int REQ_CODE_GET_FILE = 1002;

@@ -73,6 +73,16 @@ public class CryptoXFile
 		this.favorite = favorite;
 	}
 
+	public String getHashValue()
+	{
+		return hashValue;
+	}
+
+	public void setHashValue(String hashValue)
+	{
+		this.hashValue = hashValue;
+	}
+
 	private String name;
 	private String dateModified;
 	private String size;
@@ -80,5 +90,6 @@ public class CryptoXFile
 	private String path;
 	private boolean favorite;
 	private long sizeBytes;
+	private String hashValue;
 
 }

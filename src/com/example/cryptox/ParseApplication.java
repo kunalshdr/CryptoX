@@ -7,18 +7,17 @@ import com.parse.ParseACL;
 import com.parse.ParseCrashReporting;
 import com.parse.ParseUser;
 
-public class ParseApplication extends Application
-{
+public class ParseApplication extends Application {
 
 	@Override
-	public void onCreate()
-	{
+	public void onCreate() {
 		super.onCreate();
 
 		// crash reporting
 		ParseCrashReporting.enable(this);
 
 		// parse intialization
-		Parse.initialize(this, "zmhJWuDEZpoNpGnrBG7GRVB0zZXhlpcPs6bzZrQP", "NBj5vcvz2h4CbUdBn5YuQ6aOHX5bQESgk9fVxsBw");
+		Parse.initialize(this, "sySEqSLbaBatO2kDN5SQQ2dIzg10520ZcIgVw2FD",
+				"4zh5KLdN6VvmNHu0syoS598lBItha9ejDXNwTZdU");
 	}
 }

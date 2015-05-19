@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+// not used in current implementation 
 public class GetFileListAsyncTask extends AsyncTask<Void, Void, ArrayList<CryptoXFile>>
 {
 
@@ -39,9 +40,6 @@ public class GetFileListAsyncTask extends AsyncTask<Void, Void, ArrayList<Crypto
 		Entry entries = null;
 		try
 		{
-			// TODO (kshridha): get the file list from parse and display
-			// populate array list of crypto files
-			// remove the metadata call
 			entries = FileListActivity.mDBApi.metadata("/CryptoX/", 100, null, true, null);
 		}
 		catch (DropboxException e)
@@ -70,7 +68,7 @@ public class GetFileListAsyncTask extends AsyncTask<Void, Void, ArrayList<Crypto
 	@Override
 	protected void onPostExecute(ArrayList<CryptoXFile> result)
 	{
-		fActivity.setListViewAdapter(result);
+		//fActivity.setListViewAdapter(result);
 		pb.dismiss();
 	}
 

@@ -46,9 +46,12 @@ public class FileAdapter extends ArrayAdapter<CryptoXFile>
 		fileNameTextView.setText(object.get(position).getName());
 		fileSizeTextView.setText(object.get(position).getSize());
 
-		// remove the +0000 part from date 
+		// remove the +0000 or -0000 part from date
 		String date = object.get(position).getDateModified();
-		date = date.substring(0, date.indexOf('+')).trim();
+		int index = date.indexOf('+'); 
+		if (index == -1)
+			index = date.indexOf('-');
+		date = date.substring(0, index).trim();
 		fileModifiedDateTextView.setText(date);
 
 		// set the image icon based on the file type

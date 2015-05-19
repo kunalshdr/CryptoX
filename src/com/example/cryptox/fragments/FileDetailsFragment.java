@@ -158,7 +158,7 @@ public class FileDetailsFragment extends Fragment
 			public void onClick(View v)
 			{
 				String path = cryptoXFile.getPath() + cryptoXFile.getName();
-				new DownloadFileAsyncTask((FileListActivity) getActivity()).execute(path);
+				new DownloadFileAsyncTask((FileListActivity) getActivity()).execute(cryptoXFile);
 
 			}
 		});

@@ -35,8 +35,7 @@ public class UploadFileAsyncTask extends AsyncTask<String, Void, Void>
 	protected void onPostExecute(Void result)
 	{
 		Toast.makeText(fActivity, "File Upload Complete", Toast.LENGTH_SHORT).show();
-		// TODO (kshridha): Add code to refresh list view adapter to display
-		// uploaded file also
+		fActivity.refreshListView();
 	}
 
 	@Override

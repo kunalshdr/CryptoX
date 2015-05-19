@@ -54,11 +54,11 @@
 
     <ImageView
         android:id="@+id/imageViewCryptoX"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="180dp"
+        android:layout_height="140dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="53dp"
-        android:src="@drawable/ic_folder" />
+        android:layout_marginTop="26dp"
+        android:src="@drawable/ic_crypto" />
 
 </RelativeLayout>

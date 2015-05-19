@@ -13,8 +13,6 @@ import android.view.Menu;
 public class MainActivity extends Activity implements SignUpHandler, LoadFilesScreenFromSignUp
 {
 
-	// TODO (kshridha): add progress bar while logging in/signup
-	// TODO (kshridha): clear user creds on Login fragment after logout
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -39,7 +37,6 @@ public class MainActivity extends Activity implements SignUpHandler, LoadFilesSc
 	{
 		Intent intent = new Intent(getBaseContext(), FileListActivity.class);
 		startActivity(intent);
-
 	}
 
 	@Override

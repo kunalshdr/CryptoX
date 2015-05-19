@@ -20,4 +20,5 @@ public class User implements Comparable<User>
 	{
 		return this.getName().compareToIgnoreCase(another.getName());
 	}
+
 }
